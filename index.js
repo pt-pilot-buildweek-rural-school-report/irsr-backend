@@ -24,6 +24,18 @@ server.post('/api/register', (req, res) => {
 		})
 })
 
+const generateToken = user => {
+	const payload = {
+		username: user.username
+	}
+	const secret = process.env.JWT_SECRET
+
+	const options = {
+		expiresIn: '20m'
+	}
+	return jwt.sign(payload, secret, options)
+}
+
 
 server.listen(PORT, () => {
 	console.log(`Listening on port ${PORT}`)
