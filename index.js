@@ -20,7 +20,7 @@ server.post('/api/register', (req, res) => {
 			res.status(201).json(id)
 		})
 		.catch(() => {
-			res.status(500).json({ error: 'Unable to register user.'})
+			res.status(500).json({ error: 'Unable to register user.' })
 		})
 })
 
@@ -36,6 +36,25 @@ const generateToken = user => {
 	return jwt.sign(payload, secret, options)
 }
 
+server.post('/api/login', (req, res) => {
+	const creds = req.body
+	db('users')
+		.where({ username: creds.username })
+		.first()
+		.then(user => {
+			if (user && bcrypt.compareSync(creds.password, user.password)) {
+				const token = generateToken(user)
+				res
+					.status(200)
+					.json({ message: `${user.username} is now logged in`, token })
+			} else {
+				res.status(401).json({ message: 'You are not authorized.' })
+			}
+		})
+		.catch(() => {
+			res.status(500).json({ messgae: 'Please try logging in again.' })
+		})
+})
 
 server.listen(PORT, () => {
 	console.log(`Listening on port ${PORT}`)
