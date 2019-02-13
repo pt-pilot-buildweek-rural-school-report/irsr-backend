@@ -10,6 +10,21 @@ server.use(express.json())
 
 mwConfig(server)
 
+server.post('/api/register', (req, res) => {
+	const creds = req.body
+	const hash = bcrypt.hashSync(creds.password, 12)
+	creds.password = hash
+	db('users')
+		.insert(creds)
+		.then(id => {
+			res.status(201).json(id)
+		})
+		.catch(() => {
+			res.status(500).json({ error: 'Unable to register user.'})
+		})
+})
+
+
 server.listen(PORT, () => {
 	console.log(`Listening on port ${PORT}`)
 })
