@@ -121,6 +121,22 @@ server.get('/api/users/:id', (req, res) => {
 	  })
   })
 
+  server.put('/api/users/:id', (req, res) => {
+	const { id } = req.params
+	const user = req.body
+	db('users')
+	.where({ id })
+	  .update(user)
+	  .then(rowCount => {
+		res.status(200).json(rowCount)
+	  })
+	  .catch(() => {
+		res
+		  .status(500)
+		  .json({ error: 'Failed to update information about this user.' })
+	  })
+  })
+
 server.delete('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
