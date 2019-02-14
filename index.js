@@ -48,7 +48,7 @@ function generateToken(user) {
 	const payload = {
 		username: user.username,
 		userId: user.id,
-		roles: ['admin', 'student',] //example: should come from database user.roles
+		roles: ['user.is_admin', 'user.is_board_member',] //example: should come from database user.roles
 	}
 
 	const secret = process.env.JWT_SECRET
@@ -95,9 +95,10 @@ function authenticate(req, res, next) {
 	}
 }
 
+//USERS ENDPOINTS
 server.get('/api/users', authenticate,(req, res) => {
 	db('users')
-		.select('id', 'username') //<----NEVER EVER SEND THE PASSWORD BACK TO THE CLIENT, THIS IS WHAT NOT TO DO!!!
+		.select('id', 'username') 
 		.then(users => {
 			res.json({ users, decodedToken: req.decodedToken })
 		})
@@ -105,6 +106,30 @@ server.get('/api/users', authenticate,(req, res) => {
 			res.status(500).json({ message: 'You shall not pass!' })
 		})
 })
+
+server.delete('/api/users/:id', (req, res) => {
+	const { id } = req.params
+	db('users')
+	  .where({ id })
+	  .del() 
+	  .then(count => {
+		if (count) {
+		  res.json({
+			message: 'The user was successfully deleted from the database.'
+		  })
+		} else {
+		  res.status(404).json({
+			error:
+			  'The user with the specified id does not exist in the database.'
+		  })
+		}
+	  })
+	  .catch(err => {
+		res
+		  .status(500)
+		  .json({ error: 'The user could not be removed from the database.' })
+	  })
+  })
 
 server.listen(PORT, () => {
 	console.log(`Listening on port ${PORT}`)
