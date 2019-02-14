@@ -59,15 +59,13 @@ function generateToken(user) {
 	return jwt.sign(payload, secret, options)
 }
 
-server.post('/login', (req, res) => {
+server.post('/api/login', (req, res) => {
 	const creds = req.body
 	db('users')
 		.where({ username: creds.username })
 		.first()
 		.then(user => {
 			if (user && bcrypt.compareSync(creds.password, user.password)) {
-				//login is successful
-				//create token
 				const token = generateToken(user)
 				res
 					.status(200)
