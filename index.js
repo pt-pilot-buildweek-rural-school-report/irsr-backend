@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -43,35 +44,67 @@ server.post('/api/register', (req, res) => {
 	}
 })
 
-const generateToken = user => {
+function generateToken(user) {
 	const payload = {
-		username: user.username
+		username: user.username,
+		userId: user.id,
+		roles: ['admin', 'student',] //example: should come from database user.roles
 	}
+
 	const secret = process.env.JWT_SECRET
 
 	const options = {
-		expiresIn: '20m'
+		expiresIn: '45m'
 	}
 	return jwt.sign(payload, secret, options)
 }
 
-server.post('/api/login', (req, res) => {
+server.post('/login', (req, res) => {
 	const creds = req.body
 	db('users')
 		.where({ username: creds.username })
 		.first()
 		.then(user => {
 			if (user && bcrypt.compareSync(creds.password, user.password)) {
+				//login is successful
+				//create token
 				const token = generateToken(user)
 				res
 					.status(200)
-					.json({ message: `${user.username} is now logged in`, token })
+					.json({ message: `${user.username} is logged in`, token })
 			} else {
-				res.status(401).json({ message: 'You are not authorized.' })
+				res.status(401).json({ message: 'You shall not pass!' })
 			}
 		})
+		.catch(() =>
+			res.status(500).json({ message: 'Please try logging in again.' })
+		)
+})
+
+function authenticate(req, res, next) {
+	const token = req.headers.authorization
+	if (token) {
+		jwt.verify(token, jwtKey, (err, decodedToken) => {
+			if (err) {
+				res.status(401).json({ message: 'invalid token' })
+			} else {
+				req.decodedToken = decodedToken
+				next()
+			}
+		})
+	} else {
+		res.status(401).json({ message: 'no token provided' })
+	}
+}
+
+server.get('/users', authenticate,(req, res) => {
+	db('users')
+		.select('id', 'username') //<----NEVER EVER SEND THE PASSWORD BACK TO THE CLIENT, THIS IS WHAT NOT TO DO!!!
+		.then(users => {
+			res.json({ users, decodedToken: req.decodedToken })
+		})
 		.catch(() => {
-			res.status(500).json({ messgae: 'Please try logging in again.' })
+			res.status(500).json({ message: 'You shall not pass!' })
 		})
 })
 
