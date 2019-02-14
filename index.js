@@ -107,6 +107,20 @@ server.get('/api/users', authenticate,(req, res) => {
 		})
 })
 
+server.get('/api/users/:id', (req, res) => {
+	const { id } = req.params
+	db('users')
+	.where({ id })
+	  .then(users => {
+		res.json(users)
+	  })
+	  .catch(() => {
+		res.status(500).json({
+		  error: 'Could not find the user in the database.'
+		})
+	  })
+  })
+
 server.delete('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
