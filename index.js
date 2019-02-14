@@ -82,7 +82,7 @@ server.post('/api/login', (req, res) => {
 function authenticate(req, res, next) {
 	const token = req.headers.authorization
 	if (token) {
-		jwt.verify(token, jwtKey, (err, decodedToken) => {
+		jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
 			if (err) {
 				res.status(401).json({ message: 'invalid token' })
 			} else {
@@ -95,7 +95,7 @@ function authenticate(req, res, next) {
 	}
 }
 
-server.get('/users', authenticate,(req, res) => {
+server.get('/api/users', authenticate,(req, res) => {
 	db('users')
 		.select('id', 'username') //<----NEVER EVER SEND THE PASSWORD BACK TO THE CLIENT, THIS IS WHAT NOT TO DO!!!
 		.then(users => {
