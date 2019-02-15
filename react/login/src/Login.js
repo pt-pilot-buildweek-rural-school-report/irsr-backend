@@ -2,13 +2,13 @@ import React, { Component } from 'react'
 import axios from 'axios'
 
 class Login extends Component {
-  constructor() {
-    super()
-	this.state = {
-		username: '',
-		password: ''
-  }
-}
+	constructor() {
+		super()
+		this.state = {
+			username: '',
+			password: ''
+		}
+	}
 
 	async componentDidMount() {
 		const endpoint = `${process.env.REACT_APP_API_URL}/api/users`
@@ -19,6 +19,23 @@ class Login extends Component {
 			console.error('we ran into an issue getting the users')
 		}
 	}
+
+	handleInputChange = e => {
+		this.setState({ [e.target.name]: e.target.value })
+	}
+
+	handleSubmit = e => {
+		e.preventDefault()
+
+		const endpoint = `${process.env.REACT_APP_API_URL}/api/login`
+		axios
+			.post(endpoint, this.state)
+			.then(res => {
+				localStorage.setItem('jwt', res.data.token)
+			})
+			.catch(err => console.err(err))
+	}
+
 	render() {
 		return (
 			<form onSubmit={this.handleSubmit}>
@@ -33,7 +50,7 @@ class Login extends Component {
 				</div>
 				<div>
 					<input
-						name='username'
+						name='password'
 						value={this.state.password}
 						placeholder='password'
 						onChange={this.handleInputChange}
@@ -45,22 +62,6 @@ class Login extends Component {
 				</div>
 			</form>
 		)
-	}
-
-	handleInputChange = e => {
-		this.setState({ [e.target.name]: e.target.value })
-	}
-
-	handleSubmit = e => {
-		e.preventDefault()
-
-		const endpoint = `${process.env.REACT_APP_API_URL}/api/login`
-		axios
-			.post(endpoint, this.state)
-			.then(res => {
-				console.log('response', res)
-			})
-			.catch(err => console.err(err))
 	}
 }
 
