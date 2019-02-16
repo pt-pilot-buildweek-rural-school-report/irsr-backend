@@ -52,16 +52,16 @@ class Login extends Component {
 	}
 
 	handleSubmit = e => {
-		e.preventDefault()
+        e.preventDefault()
 
-		const endpoint = `${process.env.REACT_APP_API_URL}/api/login`
-		axios
-			.post(endpoint, this.state)
-			.then(res => {
-				console.log('response', res)
-			})
-			.catch(err => console.err(err))
-	}
+        const endpoint = `${process.env.REACT_APP_API_URL}/api/login`
+        axios
+            .post(endpoint, this.state)
+            .then(res => {
+                localStorage.setItem('jwt', res.data.token)
+            })
+            .catch(err => console.err(err))
+    }
 }
 
 export default Login
