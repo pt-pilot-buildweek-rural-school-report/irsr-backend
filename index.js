@@ -65,14 +65,14 @@ server.post('/api/login', (req, res) => {
 		.where({ username: creds.username })
 		.first()
 		.then(user => {
-			if (user && bcrypt.compareSync(creds.password, user.password)) {
+			// if (user && bcrypt.compareSync(creds.password, user.password)) {
 				const token = generateToken(user)
 				res
 					.status(200)
 					.json({ message: `${user.username} is logged in`, token })
-			} else {
-				res.status(401).json({ message: 'You shall not pass!' })
-			}
+			// } else {
+			// 	res.status(401).json({ message: 'You shall not pass!' })
+			// }
 		})
 		.catch(() =>
 			res.status(500).json({ message: 'Please try logging in again.' })

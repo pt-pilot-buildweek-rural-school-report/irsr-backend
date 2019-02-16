@@ -60,7 +60,7 @@ class Login extends Component {
             .then(res => {
                 localStorage.setItem('jwt', res.data.token)
             })
-            .catch(err => console.err(err))
+            .catch(err => console.error(err))
     }
 }
 
