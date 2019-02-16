@@ -18,7 +18,7 @@ function generateToken(user) {
 	const payload = {
 		username: user.username,
 		userId: user.id,
-		roles: ['user.is_admin', 'user.is_board_member',] //example: should come from database user.roles
+		roles: ['user.is_admin', 'user.is_board_member'] //example: should come from database user.roles
 	}
 
 	const secret = process.env.JWT_SECRET
@@ -53,9 +53,9 @@ server.post('/api/register', (req, res) => {
 		const hash = bcrypt.hashSync(creds.password, 12)
 		creds.password = hash
 		db('users')
-			.insert(creds)	
+			.insert(creds)
 			.then(id => {
-				res.status(201).json({id: id[0]})
+				res.status(201).json({ id: id[0] })
 			})
 			.catch(() => {
 				res.status(500).json({ error: 'Unable to register user.' })
@@ -84,9 +84,9 @@ server.post('/api/login', (req, res) => {
 })
 
 // USERS ENDPOINTS
-server.get('/api/users',(req, res) => {
+server.get('/api/users', (req, res) => {
 	db('users')
-		.select('username', 'is_admin', 'is_board_member', 'school_id') 
+		.select('username', 'is_admin', 'is_board_member', 'school_id')
 		.then(users => {
 			res.json({ users, decodedToken: req.decodedToken })
 		})
@@ -98,142 +98,241 @@ server.get('/api/users',(req, res) => {
 server.get('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
-	.where({ id })
-	  .then(users => {
-		res.json(users)
-	  })
-	  .catch(() => {
-		res.status(500).json({
-		  error: 'Could not find the user in the database.'
+		.where({ id })
+		.then(users => {
+			res.json(users)
 		})
-	  })
-	})
+		.catch(() => {
+			res.status(500).json({
+				error: 'Could not find the user in the database.'
+			})
+		})
+})
 
-  server.put('/api/users/:id', (req, res) => {
+server.put('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	const user = req.body
 	db('users')
-	.where({ id })
-	  .update(user)
-	  .then(rowCount => {
-		res.status(200).json(rowCount)
-	  })
-	  .catch(() => {
-		res
-		  .status(500)
-		  .json({ error: 'Failed to update information about this user.' })
-	  })
-  })
+		.where({ id })
+		.update(user)
+		.then(rowCount => {
+			res.status(200).json(rowCount)
+		})
+		.catch(() => {
+			res
+				.status(500)
+				.json({ error: 'Failed to update information about this user.' })
+		})
+})
 
 server.delete('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
-	  .where({ id })
-	  .del() 
-	  .then(count => {
-		if (count) {
-		  res.json({
-			message: 'The user was successfully deleted from the database.'
-		  })
-		} else {
-		  res.status(404).json({
-			error:
-			  'The user with the specified id does not exist in the database.'
-		  })
-		}
-	  })
-	  .catch(err => {
-		res
-		  .status(500)
-		  .json({ error: 'The user could not be removed from the database.' })
-	  })
-	})
-	
-	//SCHOOL ENPOINTS
-	server.get('/api/schools',(req, res) => {
-		db('schools')
-			.select('school_name', 'country', 'city', 'address' ) 
-			.then(schools => {
-				res.json(schools)
-			})
-			.catch(() => {
-				res.status(500).json({ message: 'You shall not pass!' })
-			})
-	})
-
-	server.get('/api/schools/:id', (req, res) => {
-		const { id } = req.params
-		db('schools')
 		.where({ id })
-			.then(schools => {
-			res.json(schools)
-			})
-			.catch(() => {
-			res.status(500).json({
-				error: 'Could not find the school in the database.'
-			})
-			})
-		})
-
-		server.post('/api/schools', (req, res) => {
-			const school = req.body
-			if (school.school_name && school.country && school.city && school.address) {
-				db('schools')
-					.insert(school)
-					.then(ids => {
-						res.status(201).json(ids)
-					})
-					.catch(() => {
-						res
-							.status(500)
-							.json({ error: 'Failed to insert the school into the database' })
-					})
-			} else {
-				res
-					.status(400)
-					.json({ error: 'Please provide a name and full address for the school' })
-			}
-		})
-	
-		server.put('/api/schools/:id', (req, res) => {
-		const { id } = req.params
-		const school = req.body
-		db('schools')
-		.where({ id })
-			.update(school)
-			.then(school => {
-			res.status(200).json(school)
-			})
-			.catch(() => {
-			res
-				.status(500)
-				.json({ error: 'Failed to update information about this school.' })
-			})
-		})
-	
-	server.delete('/api/schools/:id', (req, res) => {
-		const { id } = req.params
-		db('schools')
-			.where({ id })
-			.del() 
-			.then(count => {
+		.del()
+		.then(count => {
 			if (count) {
 				res.json({
-				message: 'The school was successfully deleted from the database.'
+					message: 'The user was successfully deleted from the database.'
 				})
 			} else {
 				res.status(404).json({
-				error:
-					'The school with the specified id does not exist in the database.'
+					error:
+						'The user with the specified id does not exist in the database.'
 				})
 			}
+		})
+		.catch(err => {
+			res
+				.status(500)
+				.json({ error: 'The user could not be removed from the database.' })
+		})
+})
+
+//SCHOOL ENPOINTS
+server.get('/api/schools', (req, res) => {
+	db('schools')
+		.select('school_name', 'country', 'city', 'address')
+		.then(schools => {
+			res.json(schools)
+		})
+		.catch(() => {
+			res
+				.status(500)
+				.json({ message: 'Could not retrieve information about these schools' })
+		})
+})
+
+server.get('/api/schools/:id', (req, res) => {
+	const { id } = req.params
+	db('schools')
+		.where({ id })
+		.then(schools => {
+			res.json(schools)
+		})
+		.catch(() => {
+			res.status(500).json({
+				error: 'Could not find the school in the database.'
 			})
-			.catch(err => {
+		})
+})
+
+server.post('/api/schools', (req, res) => {
+	const school = req.body
+	if (school.school_name && school.country && school.city && school.address) {
+		db('schools')
+			.insert(school)
+			.then(ids => {
+				res.status(201).json(ids)
+			})
+			.catch(() => {
+				res
+					.status(500)
+					.json({ error: 'Failed to insert the school into the database' })
+			})
+	} else {
+		res
+			.status(400)
+			.json({ error: 'Please provide a name and full address for the school' })
+	}
+})
+
+server.put('/api/schools/:id', (req, res) => {
+	const { id } = req.params
+	const school = req.body
+	db('schools')
+		.where({ id })
+		.update(school)
+		.then(school => {
+			res.status(200).json(school)
+		})
+		.catch(() => {
+			res
+				.status(500)
+				.json({ error: 'Failed to update information about this school.' })
+		})
+})
+
+server.delete('/api/schools/:id', (req, res) => {
+	const { id } = req.params
+	db('schools')
+		.where({ id })
+		.del()
+		.then(count => {
+			if (count) {
+				res.json({
+					message: 'The school was successfully deleted from the database.'
+				})
+			} else {
+				res.status(404).json({
+					error:
+						'The school with the specified id does not exist in the database.'
+				})
+			}
+		})
+		.catch(err => {
 			res
 				.status(500)
 				.json({ error: 'The school could not be removed from the database.' })
+		})
+})
+
+//ISSUE ENPOINTS
+server.get('/api/issues', (req, res) => {
+	db('issues')
+		.select(
+			'issue_name',
+			'is_complete',
+			'is_scheduled',
+			'is_ignored',
+			'comments',
+			'school_id',
+			'user_id'
+		)
+		.then(issues => {
+			res.json(issues)
+		})
+		.catch(() => {
+			res
+				.status(500)
+				.json({ message: 'Cannot retrieve information about these issues.' })
+		})
+})
+
+server.get('/api/issues/:id', (req, res) => {
+	const { id } = req.params
+	db('issues')
+		.where({ id })
+		.then(issues => {
+			res.json(issues)
+		})
+		.catch(() => {
+			res.status(500).json({
+				error: 'Could not find the issue in the database.'
 			})
 		})
+})
+
+//POST NOT WORKING PROPERLY
+server.post('/api/issues', (req, res) => {
+	const issue = req.body
+	if (issue.issue_name && issue.comments && issue.school_id && issue.user_id) {
+		db('issues')
+			.insert(issue)
+			.then(ids => {
+				res.status(201).json(ids)
+			})
+			.catch(() => {
+				res
+					.status(500)
+					.json({ error: 'Failed to insert the issue into the database' })
+			})
+	} else {
+		res
+			.status(400)
+			.json({ error: 'Please provide all fields' })
+	}
+})
+
+server.put('/api/issues/:id', (req, res) => {
+	const { id } = req.params
+	const issue = req.body
+	db('issues')
+		.where({ id })
+		.update(issue)
+		.then(issue => {
+			res.status(200).json(issue)
+		})
+		.catch(() => {
+			res
+				.status(500)
+				.json({ error: 'Failed to update information about this issue.' })
+		})
+})
+
+server.delete('/api/issues/:id', (req, res) => {
+	const { id } = req.params
+	db('issues')
+		.where({ id })
+		.del()
+		.then(issue => {
+			if (issue) {
+				res.json({
+					message: 'The issue was successfully deleted from the database.'
+				})
+			} else {
+				res.status(404).json({
+					error:
+						'The issue with the specified id does not exist in the database.'
+				})
+			}
+		})
+		.catch(err => {
+			res
+				.status(500)
+				.json({ error: 'The issue could not be removed from the database.' })
+		})
+})
 
 server.listen(PORT, () => {
 	console.log(`Listening on port ${PORT}`)
