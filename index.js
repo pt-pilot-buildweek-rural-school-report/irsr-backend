@@ -34,9 +34,9 @@ server.post('/api/register', (req, res) => {
 		const hash = bcrypt.hashSync(creds.password, 12)
 		creds.password = hash
 		db('users')
-			.insert(creds)
+			.insert(creds)	
 			.then(id => {
-				res.status(201).json(id)
+				res.status(201).json({id: id[0]})
 			})
 			.catch(() => {
 				res.status(500).json({ error: 'Unable to register user.' })
@@ -65,14 +65,14 @@ server.post('/api/login', (req, res) => {
 		.where({ username: creds.username })
 		.first()
 		.then(user => {
-			// if (user && bcrypt.compareSync(creds.password, user.password)) {
+			if (user && bcrypt.compareSync(creds.password, user.password)) {
 				const token = generateToken(user)
 				res
 					.status(200)
 					.json({ message: `${user.username} is logged in`, token })
-			// } else {
-			// 	res.status(401).json({ message: 'You shall not pass!' })
-			// }
+			} else {
+				res.status(401).json({ message: 'You shall not pass!' })
+			}
 		})
 		.catch(() =>
 			res.status(500).json({ message: 'Please try logging in again.' })
@@ -98,7 +98,7 @@ function authenticate(req, res, next) {
 //USERS ENDPOINTS
 server.get('/api/users',(req, res) => {
 	db('users')
-		.select('id', 'username') 
+		.select('username', 'is_admin', 'is_board_member', 'school_id') 
 		.then(users => {
 			res.json({ users, decodedToken: req.decodedToken })
 		})
