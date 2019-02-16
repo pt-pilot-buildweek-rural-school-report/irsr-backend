@@ -2,13 +2,13 @@
   "name": "irsr-backend",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/pt-pilot-buildweek-rural-school-report/irsr-backend.git",
-  "author": "cocoitali <cmburatto@gmail.com>",
-  "license": "MIT",
   "scripts": {
     "start": "node index.js",
     "server": "nodemon"
   },
+  "repository": "https://github.com/pt-pilot-buildweek-rural-school-report/irsr-backend.git",
+  "author": "cocoitali <cmburatto@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
