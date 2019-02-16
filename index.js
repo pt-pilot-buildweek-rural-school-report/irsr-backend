@@ -96,7 +96,7 @@ function authenticate(req, res, next) {
 }
 
 //USERS ENDPOINTS
-server.get('/api/users', authenticate,(req, res) => {
+server.get('/api/users',(req, res) => {
 	db('users')
 		.select('id', 'username') 
 		.then(users => {
