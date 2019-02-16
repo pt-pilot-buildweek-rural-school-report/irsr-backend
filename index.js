@@ -107,7 +107,7 @@ server.get('/api/users/:id', (req, res) => {
 		  error: 'Could not find the user in the database.'
 		})
 	  })
-  })
+	})
 
   server.put('/api/users/:id', (req, res) => {
 	const { id } = req.params
@@ -154,12 +154,86 @@ server.delete('/api/users/:id', (req, res) => {
 		db('schools')
 			.select('school_name', 'country', 'city', 'address' ) 
 			.then(schools => {
-				res.json({ schools, decodedToken: req.decodedToken })
+				res.json(schools)
 			})
 			.catch(() => {
 				res.status(500).json({ message: 'You shall not pass!' })
 			})
 	})
+
+	server.get('/api/schools/:id', (req, res) => {
+		const { id } = req.params
+		db('schools')
+		.where({ id })
+			.then(schools => {
+			res.json(schools)
+			})
+			.catch(() => {
+			res.status(500).json({
+				error: 'Could not find the school in the database.'
+			})
+			})
+		})
+
+		server.post('/api/schools', (req, res) => {
+			const school = req.body
+			if (school.school_name && school.country && school.city && school.address) {
+				db('schools')
+					.insert(school)
+					.then(ids => {
+						res.status(201).json(ids)
+					})
+					.catch(() => {
+						res
+							.status(500)
+							.json({ error: 'Failed to insert the school into the database' })
+					})
+			} else {
+				res
+					.status(400)
+					.json({ error: 'Please provide a name and full address for the school' })
+			}
+		})
+	
+		server.put('/api/schools/:id', (req, res) => {
+		const { id } = req.params
+		const school = req.body
+		db('schools')
+		.where({ id })
+			.update(school)
+			.then(school => {
+			res.status(200).json(school)
+			})
+			.catch(() => {
+			res
+				.status(500)
+				.json({ error: 'Failed to update information about this school.' })
+			})
+		})
+	
+	server.delete('/api/schools/:id', (req, res) => {
+		const { id } = req.params
+		db('schools')
+			.where({ id })
+			.del() 
+			.then(count => {
+			if (count) {
+				res.json({
+				message: 'The school was successfully deleted from the database.'
+				})
+			} else {
+				res.status(404).json({
+				error:
+					'The school with the specified id does not exist in the database.'
+				})
+			}
+			})
+			.catch(err => {
+			res
+				.status(500)
+				.json({ error: 'The school could not be removed from the database.' })
+			})
+		})
 
 server.listen(PORT, () => {
 	console.log(`Listening on port ${PORT}`)
