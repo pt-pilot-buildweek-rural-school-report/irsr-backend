@@ -5,12 +5,31 @@ const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
 const db = require('./data/dbConfig.js')
 
+const { authenticate } = require('./data/auth/authenticate')
+
 const PORT = process.env.PORT || 5000
 const server = express()
 server.use(express.json())
 
 mwConfig(server)
 
+//GENERATES JWT
+function generateToken(user) {
+	const payload = {
+		username: user.username,
+		userId: user.id,
+		roles: ['user.is_admin', 'user.is_board_member',] //example: should come from database user.roles
+	}
+
+	const secret = process.env.JWT_SECRET
+
+	const options = {
+		expiresIn: '48hr'
+	}
+	return jwt.sign(payload, secret, options)
+}
+
+//AUTH ENDPOINTS
 server.post('/api/register', (req, res) => {
 	// typeof user.is_admin === 'boolean' &&
 	// typeof user.is_board_member === 'boolean'
@@ -44,21 +63,6 @@ server.post('/api/register', (req, res) => {
 	}
 })
 
-function generateToken(user) {
-	const payload = {
-		username: user.username,
-		userId: user.id,
-		roles: ['user.is_admin', 'user.is_board_member',] //example: should come from database user.roles
-	}
-
-	const secret = process.env.JWT_SECRET
-
-	const options = {
-		expiresIn: '48hr'
-	}
-	return jwt.sign(payload, secret, options)
-}
-
 server.post('/api/login', (req, res) => {
 	const creds = req.body
 	db('users')
@@ -79,23 +83,7 @@ server.post('/api/login', (req, res) => {
 		)
 })
 
-function authenticate(req, res, next) {
-	const token = req.headers.authorization
-	if (token) {
-		jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
-			if (err) {
-				res.status(401).json({ message: 'invalid token' })
-			} else {
-				req.decodedToken = decodedToken
-				next()
-			}
-		})
-	} else {
-		res.status(401).json({ message: 'no token provided' })
-	}
-}
-
-//USERS ENDPOINTS
+// USERS ENDPOINTS
 server.get('/api/users',(req, res) => {
 	db('users')
 		.select('username', 'is_admin', 'is_board_member', 'school_id') 
@@ -159,7 +147,19 @@ server.delete('/api/users/:id', (req, res) => {
 		  .status(500)
 		  .json({ error: 'The user could not be removed from the database.' })
 	  })
-  })
+	})
+	
+	//SCHOOL ENPOINTS
+	server.get('/api/schools',(req, res) => {
+		db('schools')
+			.select('school_name', 'country', 'city', 'address' ) 
+			.then(schools => {
+				res.json({ schools, decodedToken: req.decodedToken })
+			})
+			.catch(() => {
+				res.status(500).json({ message: 'You shall not pass!' })
+			})
+	})
 
 server.listen(PORT, () => {
 	console.log(`Listening on port ${PORT}`)
