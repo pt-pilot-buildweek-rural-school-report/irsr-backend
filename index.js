@@ -1,5 +1,8 @@
 require('dotenv').config()
 const express = require('express')
+const userRoutes = require('./data/routes/userRoutes')
+// const schoolRoutes = require('./')
+// const loginRoutes = require('./data/routes/loginRoutes')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
@@ -10,6 +13,19 @@ const server = express()
 server.use(express.json())
 
 mwConfig(server)
+
+server.use('/api/users', userRoutes)
+// server.use('/api/schools', schoolRoutes)
+
+server.get('/api/schools', (req, res) => {
+	db('schools')
+		.then(schools => {
+			res.json(school)
+		})
+		.catch(() => {
+			res.status(500).json({ error: 'Information about the schools cannot be retrieved.' })
+		})
+})
 
 server.post('/api/register', (req, res) => {
 	// typeof user.is_admin === 'boolean' &&
@@ -78,88 +94,6 @@ server.post('/api/login', (req, res) => {
 			res.status(500).json({ message: 'Please try logging in again.' })
 		)
 })
-
-function authenticate(req, res, next) {
-	const token = req.headers.authorization
-	if (token) {
-		jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
-			if (err) {
-				res.status(401).json({ message: 'invalid token' })
-			} else {
-				req.decodedToken = decodedToken
-				next()
-			}
-		})
-	} else {
-		res.status(401).json({ message: 'no token provided' })
-	}
-}
-
-//USERS ENDPOINTS
-server.get('/api/users', authenticate,(req, res) => {
-	db('users')
-		.select('id', 'username') 
-		.then(users => {
-			res.json({ users, decodedToken: req.decodedToken })
-		})
-		.catch(() => {
-			res.status(500).json({ message: 'You shall not pass!' })
-		})
-})
-
-server.get('/api/users/:id', (req, res) => {
-	const { id } = req.params
-	db('users')
-	.where({ id })
-	  .then(users => {
-		res.json(users)
-	  })
-	  .catch(() => {
-		res.status(500).json({
-		  error: 'Could not find the user in the database.'
-		})
-	  })
-  })
-
-  server.put('/api/users/:id', (req, res) => {
-	const { id } = req.params
-	const user = req.body
-	db('users')
-	.where({ id })
-	  .update(user)
-	  .then(rowCount => {
-		res.status(200).json(rowCount)
-	  })
-	  .catch(() => {
-		res
-		  .status(500)
-		  .json({ error: 'Failed to update information about this user.' })
-	  })
-  })
-
-server.delete('/api/users/:id', (req, res) => {
-	const { id } = req.params
-	db('users')
-	  .where({ id })
-	  .del() 
-	  .then(count => {
-		if (count) {
-		  res.json({
-			message: 'The user was successfully deleted from the database.'
-		  })
-		} else {
-		  res.status(404).json({
-			error:
-			  'The user with the specified id does not exist in the database.'
-		  })
-		}
-	  })
-	  .catch(err => {
-		res
-		  .status(500)
-		  .json({ error: 'The user could not be removed from the database.' })
-	  })
-  })
 
 server.listen(PORT, () => {
 	console.log(`Listening on port ${PORT}`)
