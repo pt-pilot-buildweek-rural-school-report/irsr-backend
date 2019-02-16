@@ -1,5 +1,8 @@
 require('dotenv').config()
 const express = require('express')
+const userRoutes = require('./data/routes/userRoutes')
+// const schoolRoutes = require('./')
+// const loginRoutes = require('./data/routes/loginRoutes')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
@@ -10,6 +13,19 @@ const server = express()
 server.use(express.json())
 
 mwConfig(server)
+
+server.use('/api/users', userRoutes)
+// server.use('/api/schools', schoolRoutes)
+
+server.get('/api/schools', (req, res) => {
+	db('schools')
+		.then(schools => {
+			res.json(school)
+		})
+		.catch(() => {
+			res.status(500).json({ error: 'Information about the schools cannot be retrieved.' })
+		})
+})
 
 server.post('/api/register', (req, res) => {
 	// typeof user.is_admin === 'boolean' &&
@@ -78,6 +94,7 @@ server.post('/api/login', (req, res) => {
 			res.status(500).json({ message: 'Please try logging in again.' })
 		)
 })
+
 
 function authenticate(req, res, next) {
 	const token = req.headers.authorization
