@@ -29,7 +29,7 @@ function generateToken(user) {
 	const payload = {
 		username: user.username,
 		userId: user.id,
-		roles: ['user.is_admin', 'user.is_board_member'] //example: should come from database user.roles
+		roles: ['admin', 'board']
 	}
 
 	const secret = process.env.JWT_SECRET
