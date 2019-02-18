@@ -5,30 +5,13 @@ const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
 const db = require('./data/dbConfig.js')
 
-const { authenticate } = require('./data/auth/authenticate')
-
 const PORT = process.env.PORT || 5000
 const server = express()
 server.use(express.json())
 
 mwConfig(server)
 
-// //GENERATES JWT
-// function generateToken(user) {
-// 	const payload = {
-// 		username: user.username,
-// 		userId: user.id,
-// 		roles: ['user.is_admin', 'user.is_board_member'] //example: should come from database user.roles
-// 	}
-
-// 	const secret = process.env.JWT_SECRET
-
-// 	const options = {
-// 		expiresIn: '48hr'
-// 	}
-// 	return jwt.sign(payload, secret, options)
-// }
-const { generateToken} = require('./data/auth/authenticate')
+const { authenticate, generateToken } = require('./data/auth/authenticate')
 
 //AUTH ENDPOINTS
 server.post('/api/register', (req, res) => {
@@ -245,7 +228,7 @@ server.get('/api/issues', (req, res) => {
 			'issue_name',
 			'issue_type',
 			'created_at',
-			"logged_by",
+			'logged_by',
 			'is_resolved',
 			'date_resolved',
 			'resolved_by',

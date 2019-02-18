@@ -1,20 +1,21 @@
 const jwt = require('jsonwebtoken')
 
-
 module.exports = {
-	authenticate
+	authenticate,
+	generateToken
 }
 
 function authenticate(req, res, next) {
 	const token = req.get('Authorization')
 
 	if (token) {
-		jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-			if (err) return res.status(401).json(err)
-
-			req.decoded = decoded
-
-			next()
+		jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+			if (err) {
+				res.status(401).json({ messge: 'invalid token' })
+			} else {
+				req.decodedToken = decodedToken
+				next()
+			}
 		})
 	} else {
 		return res.status(401).json({
@@ -22,3 +23,21 @@ function authenticate(req, res, next) {
 		})
 	}
 }
+
+//GENERATES JWT
+function generateToken(user) {
+	const payload = {
+		username: user.username,
+		userId: user.id,
+		roles: ['user.is_admin', 'user.is_board_member'] //example: should come from database user.roles
+	}
+
+	const secret = process.env.JWT_SECRET
+
+	const options = {
+		expiresIn: '48hr'
+	}
+	return jwt.sign(payload, secret, options)
+}
+
+
