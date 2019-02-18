@@ -1,4 +1,3 @@
-
 exports.up = function(knex, Promise) {
 	return knex.schema.createTable('users', tbl => {
 		tbl.increments('id')
@@ -6,8 +5,7 @@ exports.up = function(knex, Promise) {
 			.string('username', 128)
 			.notNullable()
 			.unique()
-		tbl.boolean('is_admin').defaultTo(false)
-		tbl.boolean('is_board_member').defaultTo(false)
+		tbl.string('role').notNullable()
 		tbl.string('password', 128).notNullable()
 		tbl.integer('school_id').unsigned()
 		tbl
