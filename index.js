@@ -87,7 +87,7 @@ server.post('/api/login', (req, res) => {
 // USERS ENDPOINTS
 server.get('/api/users', authenticate, (req, res) => {
 	db('users')
-		.select('username', 'is_admin', 'is_board_member', 'school_id')
+		.select('username', 'role', 'school_id')
 		.then(users => {
 			res.json({ users, decodedToken: req.decodedToken })
 		})
