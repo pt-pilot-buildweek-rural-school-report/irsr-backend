@@ -13,21 +13,22 @@ server.use(express.json())
 
 mwConfig(server)
 
-//GENERATES JWT
-function generateToken(user) {
-	const payload = {
-		username: user.username,
-		userId: user.id,
-		roles: ['user.is_admin', 'user.is_board_member'] //example: should come from database user.roles
-	}
+// //GENERATES JWT
+// function generateToken(user) {
+// 	const payload = {
+// 		username: user.username,
+// 		userId: user.id,
+// 		roles: ['user.is_admin', 'user.is_board_member'] //example: should come from database user.roles
+// 	}
 
-	const secret = process.env.JWT_SECRET
+// 	const secret = process.env.JWT_SECRET
 
-	const options = {
-		expiresIn: '48hr'
-	}
-	return jwt.sign(payload, secret, options)
-}
+// 	const options = {
+// 		expiresIn: '48hr'
+// 	}
+// 	return jwt.sign(payload, secret, options)
+// }
+const { generateToken} = require('./data/auth/authenticate')
 
 //AUTH ENDPOINTS
 server.post('/api/register', (req, res) => {
@@ -84,7 +85,7 @@ server.post('/api/login', (req, res) => {
 })
 
 // USERS ENDPOINTS
-server.get('/api/users', (req, res) => {
+server.get('/api/users', authenticate, (req, res) => {
 	db('users')
 		.select('username', 'is_admin', 'is_board_member', 'school_id')
 		.then(users => {
@@ -242,9 +243,14 @@ server.get('/api/issues', (req, res) => {
 	db('issues')
 		.select(
 			'issue_name',
-			'is_complete',
+			'issue_type',
+			'created_at',
+			"logged_by",
+			'is_resolved',
+			'date_resolved',
+			'resolved_by',
 			'is_scheduled',
-			'is_ignored',
+			'ignored',
 			'comments',
 			'school_id',
 			'user_id'
@@ -273,7 +279,6 @@ server.get('/api/issues/:id', (req, res) => {
 		})
 })
 
-//POST NOT WORKING PROPERLY
 server.post('/api/issues', (req, res) => {
 	const issue = req.body
 	if (issue.issue_name && issue.comments && issue.school_id && issue.user_id) {
@@ -288,9 +293,7 @@ server.post('/api/issues', (req, res) => {
 					.json({ error: 'Failed to insert the issue into the database' })
 			})
 	} else {
-		res
-			.status(400)
-			.json({ error: 'Please provide all fields' })
+		res.status(400).json({ error: 'Please provide all fields' })
 	}
 })
 
