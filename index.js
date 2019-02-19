@@ -1,5 +1,8 @@
 require('dotenv').config()
 const express = require('express')
+const userRoutes = require('./data/routes/userRoutes')
+// const schoolRoutes = require('./')
+// const loginRoutes = require('./data/routes/loginRoutes')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
@@ -11,9 +14,11 @@ server.use(express.json())
 
 mwConfig(server)
 
+
 const { authenticate, generateToken } = require('./data/auth/authenticate')
 
 //AUTH ENDPOINTS
+
 server.post('/api/register', (req, res) => {
 	// typeof user.is_admin === 'boolean' &&
 	// typeof user.is_board_member === 'boolean'
@@ -67,8 +72,10 @@ server.post('/api/login', (req, res) => {
 		)
 })
 
+
 // USERS ENDPOINTS
 server.get('/api/users', authenticate, (req, res) => {
+
 	db('users')
 		.select('username', 'role', 'school_id')
 		.then(users => {
