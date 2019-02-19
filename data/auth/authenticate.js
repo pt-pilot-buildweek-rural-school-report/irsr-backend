@@ -2,8 +2,10 @@ const jwt = require('jsonwebtoken')
 
 module.exports = {
 	authenticate,
-	generateToken
+	generateToken,
+	checkRole
 }
+
 
 function authenticate(req, res, next) {
 	const token = req.get('Authorization')
@@ -21,6 +23,16 @@ function authenticate(req, res, next) {
 		return res.status(401).json({
 			error: 'No token provided, must be set on the Authorization Header'
 		})
+	}
+}
+
+function checkRole(role) {
+	return function(req, res, next) {
+		if(req.decodedToken.roles.includes(role)) {
+			next()
+		} else {
+			res.status(403).json({ messge: `you need to be a(n) ${role}`})
+		}
 	}
 }
 
