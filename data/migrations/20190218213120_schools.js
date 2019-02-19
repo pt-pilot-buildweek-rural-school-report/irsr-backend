@@ -5,12 +5,9 @@ exports.up = function(knex, Promise) {
 			.string('school_name')
 			.notNullable()
 			.unique()
-		tbl.string('country').notNullable()
-		tbl.string('city').notNullable()
-		tbl
-			.string('address')
-			.notNullable()
-			.unique()
+		tbl.string('country')
+		tbl.string('city')
+		tbl.string('address').unique()
 	})
 }
 

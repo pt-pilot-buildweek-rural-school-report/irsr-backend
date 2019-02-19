@@ -14,14 +14,11 @@ server.use(express.json())
 
 mwConfig(server)
 
-
 const { authenticate, generateToken } = require('./data/auth/authenticate')
 
 //AUTH ENDPOINTS
 
 server.post('/api/register', (req, res) => {
-	// typeof user.is_admin === 'boolean' &&
-	// typeof user.is_board_member === 'boolean'
 	const user = req.body
 	if (
 		!user.username ||
@@ -72,10 +69,8 @@ server.post('/api/login', (req, res) => {
 		)
 })
 
-
 // USERS ENDPOINTS
 server.get('/api/users', authenticate, (req, res) => {
-
 	db('users')
 		.select('username', 'role', 'school_id')
 		.then(users => {
@@ -154,19 +149,49 @@ server.get('/api/schools', (req, res) => {
 		})
 })
 
+// server.get('/api/schools/:id', (req, res) => {
+// 	const { id } = req.params
+// 	db('schools')
+// 		.where({ id })
+// 		.then(schools => {
+// 			res.json(schools)
+// 		})
+// 		.catch(() => {
+// 			res.status(500).json({
+// 				error: 'Could not find the school in the database.'
+// 			})
+// 		})
+// })
+
 server.get('/api/schools/:id', (req, res) => {
 	const { id } = req.params
 	db('schools')
-		.where({ id })
-		.then(schools => {
-			res.json(schools)
-		})
-		.catch(() => {
-			res.status(500).json({
-				error: 'Could not find the school in the database.'
-			})
-		})
-})
+	  .where('schools.id', id)
+	  .then(school => {
+		const thisSchool = school[0]
+		db('issues')
+		  .select()
+		  .where('issues.school_id', id)
+		  .then(issues => {
+			if (!thisSchool) {
+			  res.status(404).json({ err: 'invalid school id' })
+			} else {
+			  res.json({
+				id: thisSchool.id,
+				name: thisSchool.school_name,
+				country: thisSchool.country,
+				city: thisSchool.city,
+				issues: issues
+			  })
+			}
+		  })
+	  })
+	  .catch(() => {
+		res
+		  .status(404)
+		  .json({ error: 'Info about this school could not be retrieved.' })
+	  })
+  })
 
 server.post('/api/schools', (req, res) => {
 	const school = req.body
@@ -235,7 +260,6 @@ server.get('/api/issues', (req, res) => {
 			'issue_name',
 			'issue_type',
 			'created_at',
-			'logged_by',
 			'is_resolved',
 			'date_resolved',
 			'resolved_by',
@@ -271,7 +295,13 @@ server.get('/api/issues/:id', (req, res) => {
 
 server.post('/api/issues', (req, res) => {
 	const issue = req.body
-	if (issue.issue_name && issue.comments && issue.school_id && issue.user_id) {
+	if (
+		issue.issue_name &&
+		issue.issue_type &&
+		issue.is_resolved &&
+		issue.ignored &&
+		issue.comments 
+	) {
 		db('issues')
 			.insert(issue)
 			.then(ids => {
@@ -283,7 +313,7 @@ server.post('/api/issues', (req, res) => {
 					.json({ error: 'Failed to insert the issue into the database' })
 			})
 	} else {
-		res.status(400).json({ error: 'Please provide all fields' })
+		res.status(400).json({ error: 'Please provide all required fields' })
 	}
 })
 
