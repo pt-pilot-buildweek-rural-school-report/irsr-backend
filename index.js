@@ -81,19 +81,50 @@ server.get('/api/users', authenticate, (req, res) => {
 		})
 })
 
+// server.get('/api/users/:id', (req, res) => {
+// 	const { id } = req.params
+// 	db('users')
+// 		.where({ id })
+// 		.then(users => {
+// 			res.json(users)
+// 		})
+// 		.catch(() => {
+// 			res.status(500).json({
+// 				error: 'Could not find the user in the database.'
+// 			})
+// 		})
+// })
+
 server.get('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
-		.where({ id })
-		.then(users => {
-			res.json(users)
-		})
-		.catch(() => {
-			res.status(500).json({
-				error: 'Could not find the user in the database.'
-			})
-		})
-})
+	  .where('users.id', id)
+	  .then(user => {
+		const thisUser = user[0]
+		db('issues')
+		  .select()
+		  .where('issues.user_id', id)
+		  .then(issues => {
+			if (!thisUser) {
+			  res.status(404).json({ err: 'invalid user id' })
+			} else {
+			  res.json({
+				id: thisUser.id,
+				name: thisUser.username,
+				role: thisUser.role,
+				password: thisUser.password,
+				school_id: thisUser.school_id,
+				issues: issues
+			  })
+			}
+		  })
+	  })
+	  .catch(() => {
+		res
+		  .status(404)
+		  .json({ error: 'Info about this user could not be retrieved.' })
+	  })
+  })
 
 server.put('/api/users/:id', (req, res) => {
 	const { id } = req.params
@@ -148,20 +179,6 @@ server.get('/api/schools', (req, res) => {
 				.json({ message: 'Could not retrieve information about these schools' })
 		})
 })
-
-// server.get('/api/schools/:id', (req, res) => {
-// 	const { id } = req.params
-// 	db('schools')
-// 		.where({ id })
-// 		.then(schools => {
-// 			res.json(schools)
-// 		})
-// 		.catch(() => {
-// 			res.status(500).json({
-// 				error: 'Could not find the school in the database.'
-// 			})
-// 		})
-// })
 
 server.get('/api/schools/:id', (req, res) => {
 	const { id } = req.params
