@@ -1,6 +1,6 @@
 exports.up = function(knex, Promise) {
 	return knex.schema.alterTable('issues', tbl => {
-		tbl.dropColumn('logged_by')
+		tbl.renameColumn('completed_by', 'date_resolved')
 	})
 }
 

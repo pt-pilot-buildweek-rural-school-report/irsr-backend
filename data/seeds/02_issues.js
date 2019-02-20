@@ -8,8 +8,7 @@ exports.seed = function(knex, Promise) {
 				{
 					issue_name: 'HDMI cables',
 					issue_type: 'tech equipment',
-					logged_by: 'Khari',
-					is_complete: false,
+					is_resolved: false,
 					resolved_by: '',
 					is_scheduled: true,
 					ignored: false,
@@ -20,8 +19,7 @@ exports.seed = function(knex, Promise) {
 				{
 					issue_name: 'TVs',
 					issue_type: 'general school supplies',
-					logged_by: 'Courtney',
-					is_complete: false,
+					is_resolved: false,
 					resolved_by: '',
 					is_scheduled: true,
 					ignored: false,
@@ -32,8 +30,7 @@ exports.seed = function(knex, Promise) {
 				{
 					issue_name: 'Tablets',
 					issue_type: 'tech equipment',
-					logged_by: 'Khari',
-					is_complete: false,
+					is_resolved: false,
 					resolved_by: '',
 					is_scheduled: true,
 					ignored: false,
@@ -44,8 +41,7 @@ exports.seed = function(knex, Promise) {
 				{
 					issue_name: 'Routers',
 					issue_type: 'tech equipment',
-					logged_by: 'Andrew',
-					is_complete: false,
+					is_resolved: false,
 					resolved_by: '',
 					is_scheduled: true,
 					ignored: false,
@@ -57,8 +53,7 @@ exports.seed = function(knex, Promise) {
 				{
 					issue_name: 'Server',
 					issue_type: 'tech',
-					logged_by: 'Ryan',
-					is_complete: false,
+					is_resolved: false,
 					resolved_by: '',
 					is_scheduled: true,
 					ignored: false,
@@ -69,8 +64,7 @@ exports.seed = function(knex, Promise) {
 				{
 					issue_name: 'Instructor',
 					issue_type: 'personel',
-					logged_by: 'Courtney',
-					is_complete: false,
+					is_resolved: false,
 					resolved_by: '',
 					is_scheduled: true,
 					ignored: false,
