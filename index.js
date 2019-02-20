@@ -298,7 +298,7 @@ server.post('/api/issues', (req, res) => {
 		db('issues')
 			.insert(issue)
 			.then(id => {
-				res.status(201).json({...issue, id: id})
+				res.status(201).json({id:id[0], ...issue})
 			})
 			.catch(() => {
 				res
