@@ -61,13 +61,11 @@ server.post('/api/login', (req, res) => {
 		.then(user => {
 			if (user && bcrypt.compareSync(creds.password, user.password)) {
 				const token = generateToken(user)
-				res
-					.status(200)
-					.json({
-						message: `${user.username} is logged in`,
-						token,
-						id: user.id
-					})
+				res.status(200).json({
+					message: `${user.username} is logged in`,
+					token,
+					id: user.id
+				})
 			} else {
 				res.status(401).json({ message: 'You shall not pass!' })
 			}
@@ -267,7 +265,22 @@ server.delete('/api/schools/:id', (req, res) => {
 //ISSUE ENPOINTS
 server.get('/api/issues', (req, res) => {
 	db('issues')
-		.select()
+		.join('users', 'issues.user_id', '=', 'users.id')
+		.join('schools', 'issues.school_id', '=', 'schools.id')
+		.select(
+			'issues.id',
+			'issues.issue_name',
+			'issues.issue_type',
+			'issues.created_at',
+			'issues.is_resolved',
+			'issues.date_resolved',
+			'issues.resolved_by',
+			'issues.is_scheduled',
+			'issues.ignored',
+			'issues.comments',
+			'schools.school_name',
+			'users.username'
+		)
 		.then(issues => {
 			res.json(issues)
 		})
@@ -298,7 +311,7 @@ server.post('/api/issues', (req, res) => {
 		db('issues')
 			.insert(issue)
 			.then(id => {
-				res.status(201).json({id:id[0], ...issue})
+				res.status(201).json({ id: id[0], ...issue })
 			})
 			.catch(() => {
 				res
