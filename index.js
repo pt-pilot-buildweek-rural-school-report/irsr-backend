@@ -1,8 +1,8 @@
 require('dotenv').config()
 const express = require('express')
 const userRoutes = require('./data/routes/userRoutes')
-// const schoolRoutes = require('./')
-// const loginRoutes = require('./data/routes/loginRoutes')
+const schoolRoutes = require('../irsr-backend/data/routes/schoolRoutes')
+const loginRoutes = require('./data/routes/loginRoutes')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
@@ -19,6 +19,9 @@ const {
 	generateToken,
 	checkRole
 } = require('./data/auth/authenticate')
+
+// server.use('/api/schools', schoolRoutes)
+server.use('/api/users', userRoutes)
 
 //AUTH ENDPOINTS
 
@@ -73,89 +76,6 @@ server.post('/api/login', (req, res) => {
 		.catch(() =>
 			res.status(500).json({ message: 'Please try logging in again.' })
 		)
-})
-
-// USERS ENDPOINTS
-server.get('/api/users', authenticate, (req, res) => {
-	db('users')
-		.select('username', 'role', 'school_id')
-		.then(users => {
-			res.json({ users, decodedToken: req.decodedToken })
-		})
-		.catch(() => {
-			res.status(500).json({ message: 'You shall not pass!' })
-		})
-})
-
-server.get('/api/users/:id', authenticate, (req, res) => {
-	const { id } = req.params
-	db('users')
-		.where('users.id', id)
-		.then(user => {
-			const thisUser = user[0]
-			db('issues')
-				.select()
-				.where('issues.school_id', id)
-				.then(issues => {
-					if (!thisUser) {
-						res.status(404).json({ err: 'invalid user id' })
-					} else {
-						res.json({
-							id: thisUser.id,
-							name: thisUser.username,
-							role: thisUser.role,
-							password: thisUser.password,
-							school_id: thisUser.school_id,
-							issues: issues
-						})
-					}
-				})
-		})
-		.catch(() => {
-			res
-				.status(404)
-				.json({ error: 'Info about this user could not be retrieved.' })
-		})
-})
-
-server.put('/api/users/:id', (req, res) => {
-	const { id } = req.params
-	const user = req.body
-	db('users')
-		.where({ id })
-		.update(user)
-		.then(rowCount => {
-			res.status(200).json(rowCount)
-		})
-		.catch(() => {
-			res
-				.status(500)
-				.json({ error: 'Failed to update information about this user.' })
-		})
-})
-
-server.delete('/api/users/:id', (req, res) => {
-	const { id } = req.params
-	db('users')
-		.where({ id })
-		.del()
-		.then(count => {
-			if (count) {
-				res.json({
-					message: 'The user was successfully deleted from the database.'
-				})
-			} else {
-				res.status(404).json({
-					error:
-						'The user with the specified id does not exist in the database.'
-				})
-			}
-		})
-		.catch(err => {
-			res
-				.status(500)
-				.json({ error: 'The user could not be removed from the database.' })
-		})
 })
 
 //SCHOOL ENPOINTS
@@ -262,7 +182,7 @@ server.delete('/api/schools/:id', (req, res) => {
 		})
 })
 
-//ISSUE ENPOINTS
+// //ISSUE ENPOINTS
 server.get('/api/issues', (req, res) => {
 	db('issues')
 		.join('users', 'issues.user_id', '=', 'users.id')
