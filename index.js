@@ -1,8 +1,9 @@
 require('dotenv').config()
 const express = require('express')
 const userRoutes = require('./data/routes/userRoutes')
-const schoolRoutes = require('../irsr-backend/data/routes/schoolRoutes')
-const loginRoutes = require('./data/routes/loginRoutes')
+// const schoolRoutes = require('../irsr-backend/data/routes/schoolRoutes')
+// const loginRoutes = require('./data/routes/loginRoutes')
+const issueRoutes = require('./data/routes/issueRoutes')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
@@ -22,6 +23,7 @@ const {
 
 // server.use('/api/schools', schoolRoutes)
 server.use('/api/users', userRoutes)
+server.use('/api/issues', issueRoutes)
 
 //AUTH ENDPOINTS
 
@@ -179,107 +181,6 @@ server.delete('/api/schools/:id', (req, res) => {
 			res
 				.status(500)
 				.json({ error: 'The school could not be removed from the database.' })
-		})
-})
-
-// //ISSUE ENPOINTS
-server.get('/api/issues', (req, res) => {
-	db('issues')
-		.join('users', 'issues.user_id', '=', 'users.id')
-		.join('schools', 'issues.school_id', '=', 'schools.id')
-		.select(
-			'issues.id',
-			'issues.issue_name',
-			'issues.issue_type',
-			'issues.created_at',
-			'issues.is_resolved',
-			'issues.date_resolved',
-			'issues.resolved_by',
-			'issues.is_scheduled',
-			'issues.ignored',
-			'issues.comments',
-			'schools.school_name',
-			'users.username'
-		)
-		.then(issues => {
-			res.json(issues)
-		})
-		.catch(() => {
-			res
-				.status(500)
-				.json({ message: 'Cannot retrieve information about these issues.' })
-		})
-})
-
-server.get('/api/issues/:id', (req, res) => {
-	const { id } = req.params
-	db('issues')
-		.where({ id })
-		.then(issues => {
-			res.json(issues)
-		})
-		.catch(() => {
-			res.status(500).json({
-				error: 'Could not find the issue in the database.'
-			})
-		})
-})
-
-server.post('/api/issues', (req, res) => {
-	const issue = req.body
-	if (issue.issue_name && issue.issue_type && issue.comments) {
-		db('issues')
-			.insert(issue)
-			.then(id => {
-				res.status(201).json({ id: id[0], ...issue })
-			})
-			.catch(() => {
-				res
-					.status(500)
-					.json({ error: 'Failed to insert the issue into the database' })
-			})
-	} else {
-		res.status(400).json({ error: 'Please provide all required fields' })
-	}
-})
-
-server.put('/api/issues/:id', (req, res) => {
-	const { id } = req.params
-	const issue = req.body
-	db('issues')
-		.where({ id })
-		.update(issue)
-		.then(issue => {
-			res.status(200).json(issue)
-		})
-		.catch(() => {
-			res
-				.status(500)
-				.json({ error: 'Failed to update information about this issue.' })
-		})
-})
-
-server.delete('/api/issues/:id', (req, res) => {
-	const { id } = req.params
-	db('issues')
-		.where({ id })
-		.del()
-		.then(issue => {
-			if (issue) {
-				res.json({
-					message: 'The issue was successfully deleted from the database.'
-				})
-			} else {
-				res.status(404).json({
-					error:
-						'The issue with the specified id does not exist in the database.'
-				})
-			}
-		})
-		.catch(err => {
-			res
-				.status(500)
-				.json({ error: 'The issue could not be removed from the database.' })
 		})
 })
 
