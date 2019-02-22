@@ -47,15 +47,24 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
 	const issue = req.body
 	if (issue.issue_name && issue.issue_type && issue.comments) {
-		db('issues')
-			.insert(issue)
-			.then(id => {
-				res.status(201).json({ id: id[0], ...issue })
-			})
-			.catch(() => {
-				res
-					.status(500)
-					.json({ error: 'Failed to insert the issue into the database' })
+		db('users')
+			.where({ id: issue.user_id })
+			.first()
+			.then(user => {
+				if (!user) {
+					res.status(404).json({ error: 'invalid user id' })
+				} else {
+					db('issues')
+						.insert(issue)
+						.then(id => {
+							res.status(201).json({ id: id[0], ...issue })
+						})
+						.catch(() => {
+							res
+								.status(500)
+								.json({ error: 'Failed to insert the issue into the database' })
+						})
+				}
 			})
 	} else {
 		res.status(400).json({ error: 'Please provide all required fields' })
