@@ -23,8 +23,24 @@ router.get('/:id', (req, res) => {
 	.then(user => {
 	  const thisUser = user[0]
 	  db('issues')
-		.select()
-		.where('issues.user_id', id)
+	  .join('users', 'issues.user_id', '=', 'users.id')
+		.join('schools', 'issues.school_id', '=', 'schools.id')
+		.select(
+			'issues.id',
+			'issues.issue_name',
+			'issues.issue_type',
+			'issues.created_at',
+			'issues.is_resolved',
+			'issues.date_resolved',
+			'issues.resolved_by',
+			'issues.is_scheduled',
+			'issues.ignored',
+			'issues.comments',
+			'schools.school_name',
+			'users.username'
+		)
+		// .select()
+		// .where('issues.user_id', id)
 		.then(issues => {
 		  if (!thisUser) {
 			res.status(404).json({ err: 'invalid user id' })
