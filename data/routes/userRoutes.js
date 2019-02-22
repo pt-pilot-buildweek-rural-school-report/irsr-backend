@@ -19,48 +19,46 @@ router.get('/', authenticate, (req, res) => {
 router.get('/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
-	.where('users.id', id)
-	.then(user => {
-	  const thisUser = user[0]
-	  db('issues')
-	  .join('users', 'issues.user_id', '=', 'users.id')
-		.join('schools', 'issues.school_id', '=', 'schools.id')
-		.select(
-			'issues.id',
-			'issues.issue_name',
-			'issues.issue_type',
-			'issues.created_at',
-			'issues.is_resolved',
-			'issues.date_resolved',
-			'issues.resolved_by',
-			'issues.is_scheduled',
-			'issues.ignored',
-			'issues.comments',
-			'schools.school_name',
-			'users.username'
-		)
-		// .select()
-		// .where('issues.user_id', id)
-		.then(issues => {
-		  if (!thisUser) {
-			res.status(404).json({ err: 'invalid user id' })
-		  } else {
-			res.json({
-			  id: thisUser.id,
-			  name: thisUser.username,
-			  role: thisUser.role,
-			  password: thisUser.password,
-			  school_id: thisUser.school_id,
-			  issues: issues
-			})
-		  }
+		.where('users.id', id)
+		.then(user => {
+			const thisUser = user[0]
+			db('issues')
+				.join('users', 'issues.user_id', '=', 'users.id')
+				.join('schools', 'issues.school_id', '=', 'schools.id')
+				.select(
+					'issues.id',
+					'issues.issue_name',
+					'issues.issue_type',
+					'issues.created_at',
+					'issues.is_resolved',
+					'issues.date_resolved',
+					'issues.resolved_by',
+					'issues.is_scheduled',
+					'issues.ignored',
+					'issues.comments',
+					'schools.school_name',
+					'users.username'
+				)
+				.then(issues => {
+					if (!thisUser) {
+						res.status(404).json({ err: 'invalid user id' })
+					} else {
+						res.json({
+							id: thisUser.id,
+							name: thisUser.username,
+							role: thisUser.role,
+							password: thisUser.password,
+							school_id: thisUser.school_id,
+							issues: issues
+						})
+					}
+				})
 		})
-	})
-	.catch(() => {
-	  res
-		.status(404)
-		.json({ error: 'Info about this user could not be retrieved.' })
-	})
+		.catch(() => {
+			res
+				.status(404)
+				.json({ error: 'Info about this user could not be retrieved.' })
+		})
 })
 
 router.put('/:id', (req, res) => {
