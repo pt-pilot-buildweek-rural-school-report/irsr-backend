@@ -19,15 +19,32 @@ router.get('/', authenticate, (req, res) => {
 router.get('/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
-		.where({ id })
-		.then(users => {
-			res.json(users)
-		})
-		.catch(() => {
-			res.status(500).json({
-				error: 'Could not find the user in the database.'
+	.where('users.id', id)
+	.then(user => {
+	  const thisUser = user[0]
+	  db('issues')
+		.select()
+		.where('issues.user_id', id)
+		.then(issues => {
+		  if (!thisUser) {
+			res.status(404).json({ err: 'invalid user id' })
+		  } else {
+			res.json({
+			  id: thisUser.id,
+			  name: thisUser.username,
+			  role: thisUser.role,
+			  password: thisUser.password,
+			  school_id: thisUser.school_id,
+			  issues: issues
 			})
+		  }
 		})
+	})
+	.catch(() => {
+	  res
+		.status(404)
+		.json({ error: 'Info about this user could not be retrieved.' })
+	})
 })
 
 router.put('/:id', (req, res) => {
