@@ -15,7 +15,11 @@ server.use(express.json())
 
 mwConfig(server)
 
-const { authenticate, generateToken, checkRole } = require('./data/auth/authenticate')
+const {
+	authenticate,
+	generateToken,
+	checkRole
+} = require('./data/auth/authenticate')
 
 server.use('/api/schools', schoolRoutes)
 server.use('/api/users', userRoutes)
@@ -32,6 +36,7 @@ server.post('/api/register', (req, res) => {
 		res.status(400).json({ message: 'Username must be a valued string.' })
 	} else if (
 		!user.password ||
+		user.password.length < 8 ||
 		typeof user.password !== 'string' ||
 		user.password === ''
 	) {
@@ -39,13 +44,22 @@ server.post('/api/register', (req, res) => {
 			message: 'Password must be a valued string of 8 characters or more.'
 		})
 	} else {
-		const creds = req.body
-		const hash = bcrypt.hashSync(creds.password, 12)
-		creds.password = hash
-		db('users')
-			.insert(creds)
-			.then(id => {
-				res.status(201).json({ id: id[0] })
+		db('schools')
+			.where({ id: user.school_id })
+			.first()
+			.then(school => {
+				if (!school) {
+					res.status(404).json({ error: 'invalid school id' })
+				} else {
+					const creds = req.body
+					const hash = bcrypt.hashSync(creds.password, 12)
+					creds.password = hash
+					db('users')
+						.insert(creds)
+						.then(id => {
+							res.status(201).json({ id: id[0] })
+						})
+				}
 			})
 			.catch(() => {
 				res.status(500).json({ error: 'Unable to register user.' })
