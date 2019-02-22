@@ -3,9 +3,9 @@ const express = require('express')
 const db = require('../dbConfig')
 const router = express.Router()
 
-const { authenticate, checkRole } = require('../auth/authenticate')
+const { authenticate } = require('../auth/authenticate')
 
-router.get('/', authenticate, (req, res) => {
+router.get('/api/users', authenticate, (req, res) => {
 	db('users')
 		.select('id', 'username')
 		.then(users => {
@@ -16,7 +16,7 @@ router.get('/', authenticate, (req, res) => {
 		})
 })
 
-router.get('/:id', (req, res) => {
+router.get('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
 		.where({ id })
@@ -30,7 +30,7 @@ router.get('/:id', (req, res) => {
 		})
 })
 
-router.put('/:id', (req, res) => {
+router.put('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	const user = req.body
 	db('users')
@@ -46,7 +46,7 @@ router.put('/:id', (req, res) => {
 		})
 })
 
-router.delete('/:id', (req, res) => {
+router.delete('/api/users/:id', (req, res) => {
 	const { id } = req.params
 	db('users')
 		.where({ id })
