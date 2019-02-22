@@ -5,9 +5,9 @@ const router = express.Router()
 
 const { authenticate, checkRole } = require('../auth/authenticate')
 
-router.get('/', authenticate, (req, res) => {
+router.get('/', authenticate, checkRole('admin'), (req, res) => {
 	db('users')
-		.select('id', 'username')
+		.select('id', 'username', 'role', 'school_id')
 		.then(users => {
 			res.json({ users, decodedToken: req.decodedToken })
 		})

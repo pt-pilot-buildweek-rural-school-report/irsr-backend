@@ -2,10 +2,8 @@ require('dotenv').config()
 const express = require('express')
 const userRoutes = require('./data/routes/userRoutes')
 const schoolRoutes = require('../irsr-backend/data/routes/schoolRoutes')
-const authRoutes = require('./data/routes/authRoutes')
 const issueRoutes = require('./data/routes/issueRoutes')
 const bcrypt = require('bcryptjs')
-// const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
 const db = require('./data/dbConfig.js')
 
@@ -15,21 +13,17 @@ server.use(express.json())
 
 mwConfig(server)
 
-const {
-	authenticate,
-	generateToken,
-	checkRole
-} = require('./data/auth/authenticate')
-
 server.use('/api/schools', schoolRoutes)
 server.use('/api/users', userRoutes)
 server.use('/api/issues', issueRoutes)
+
+const { generateToken } = require('./data/auth/authenticate')
 
 // //AUTH ENDPOINTS
 server.post('/api/register', (req, res) => {
 	const user = req.body
 	if (
-		!user.username ||
+		user.username ||
 		typeof user.username !== 'string' ||
 		user.username === ''
 	) {
