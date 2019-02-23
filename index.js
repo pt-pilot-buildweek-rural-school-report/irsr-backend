@@ -1,11 +1,9 @@
 //require('dotenv').config()
 const express = require('express')
 const userRoutes = require('./data/routes/userRoutes')
-const schoolRoutes = require('../irsr-backend/data/routes/schoolRoutes')
-const authRoutes = require('./data/routes/authRoutes')
+const schoolRoutes = require('./data/routes/schoolRoutes')
 const issueRoutes = require('./data/routes/issueRoutes')
 const bcrypt = require('bcryptjs')
-// const jwt = require('jsonwebtoken')
 const mwConfig = require('./data/mwConfig')
 const db = require('./data/dbConfig.js')
 
@@ -15,23 +13,24 @@ server.use(express.json())
 
 mwConfig(server)
 
-const { authenticate, generateToken, checkRole } = require('./data/auth/authenticate')
-
 server.use('/api/schools', schoolRoutes)
 server.use('/api/users', userRoutes)
 server.use('/api/issues', issueRoutes)
+
+const { generateToken } = require('./data/auth/authenticate')
 
 // //AUTH ENDPOINTS
 server.post('/api/register', (req, res) => {
 	const user = req.body
 	if (
-		!user.username ||
+		user.username ||
 		typeof user.username !== 'string' ||
 		user.username === ''
 	) {
 		res.status(400).json({ message: 'Username must be a valued string.' })
 	} else if (
 		!user.password ||
+		user.password.length < 8 ||
 		typeof user.password !== 'string' ||
 		user.password === ''
 	) {
@@ -39,13 +38,22 @@ server.post('/api/register', (req, res) => {
 			message: 'Password must be a valued string of 8 characters or more.'
 		})
 	} else {
-		const creds = req.body
-		const hash = bcrypt.hashSync(creds.password, 12)
-		creds.password = hash
-		db('users')
-			.insert(creds)
-			.then(id => {
-				res.status(201).json({ id: id[0] })
+		db('schools')
+			.where({ id: user.school_id })
+			.first()
+			.then(school => {
+				if (!school) {
+					res.status(404).json({ error: 'invalid school id' })
+				} else {
+					const creds = req.body
+					const hash = bcrypt.hashSync(creds.password, 12)
+					creds.password = hash
+					db('users')
+						.insert(creds)
+						.then(id => {
+							res.status(201).json({ id: id[0] })
+						})
+				}
 			})
 			.catch(() => {
 				res.status(500).json({ error: 'Unable to register user.' })
