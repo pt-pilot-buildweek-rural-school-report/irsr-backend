@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 const userRoutes = require('./data/routes/userRoutes')
-const schoolRoutes = require('../irsr-backend/data/routes/schoolRoutes')
+const schoolRoutes = require('./data/routes/schoolRoutes')
 const issueRoutes = require('./data/routes/issueRoutes')
 const bcrypt = require('bcryptjs')
 const mwConfig = require('./data/mwConfig')
